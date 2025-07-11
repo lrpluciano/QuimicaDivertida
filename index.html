@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Interativo: Nanomateriais de Carbono</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: A thematic, single-page dashboard. The flow starts with a high-level introduction comparing Graphene and NTCs, dives into their key properties, presents a dynamic chart-based explorer for applications, visualizes the global R&D trends with another chart, and concludes with an organized view of challenges and future outlook. This structure was chosen to transform the dense report into an engaging, explorable narrative, prioritizing user understanding and interaction over the linear format of the source document. Key interactions include tab-based filtering for applications, which dynamically updates charts and text, providing a clear and impactful way to digest quantitative data. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Graphene vs. NTCs fundamental differences -> Goal: Inform/Compare -> Viz: Side-by-side card layout with icons -> Interaction: Static visual comparison -> Justification: Quick, high-level understanding of the two materials -> Library/Method: HTML/Tailwind.
+        - Report Info: Application growth statistics (e.g., +55% efficiency) -> Goal: Compare/Inform -> Viz: Bar Chart -> Interaction: User clicks on category tabs (Energy, Medicine) to update chart data and related text -> Justification: Makes quantitative data engaging and easy to compare across sectors -> Library/Method: Chart.js/Canvas.
+        - Report Info: R&D publication/patent trends over time -> Goal: Show Change/Compare -> Viz: Line Chart -> Interaction: Static chart displaying two opposing trends -> Justification: A line chart is the most effective way to visualize and contrast the research momentum shift from NTCs to Graphene over time as described in the report. -> Library/Method: Chart.js/Canvas.
+        - Report Info: Challenges & Conclusions -> Goal: Organize/Inform -> Viz: Accordion-style collapsible sections -> Interaction: User clicks to expand/collapse content -> Justification: Manages large blocks of text, preventing information overload and keeping the layout clean -> Library/Method: HTML/JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover {
+            color: #1e40af; /* dark blue */
+        }
+        .active-tab {
+            border-bottom-color: #1e40af;
+            color: #1e40af;
+            font-weight: 600;
+        }
+        .card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <h1 class="text-xl md:text-2xl font-bold text-gray-900">Nanomateriais de Carbono</h1>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#intro" class="nav-link text-gray-600 border-b-2 border-transparent">Introdução</a>
+                    <a href="#properties" class="nav-link text-gray-600 border-b-2 border-transparent">Propriedades</a>
+                    <a href="#applications" class="nav-link text-gray-600 border-b-2 border-transparent">Aplicações</a>
+                    <a href="#research" class="nav-link text-gray-600 border-b-2 border-transparent">P&D</a>
+                    <a href="#challenges" class="nav-link text-gray-600 border-b-2 border-transparent">Desafios</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <section id="intro" class="my-12">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">A Nova Fronteira do Carbono</h2>
+                <p class="max-w-3xl mx-auto text-gray-600">Este painel explora o grafeno e os nanotubos de carbono (NTCs), dois nanomateriais revolucionários com propriedades extraordinárias. A seguir, apresentamos uma visão geral interativa de sua estrutura, características, aplicações transformadoras e o cenário de pesquisa que molda seu futuro. Navegue pelas seções para descobrir como essas minúsculas estruturas prometem um impacto gigante em tecnologia e ciência.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-md card">
+                    <div class="flex items-center mb-4">
+                        <div class="text-4xl mr-4">⌬</div>
+                        <h3 class="text-2xl font-bold text-gray-900">Grafeno</h3>
+                    </div>
+                    <p class="text-gray-600">Uma folha plana bidimensional (2D) de átomos de carbono, arranjados em uma rede hexagonal. Considerado o material fundamental para outras nanoestruturas de carbono, sua estrutura planar é uma vantagem chave para a microeletrônica em larga escala.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md card">
+                    <div class="flex items-center mb-4">
+                        <div class="text-4xl mr-4">⛶</div>
+                        <h3 class="text-2xl font-bold text-gray-900">Nanotubos de Carbono (NTCs)</h3>
+                    </div>
+                    <p class="text-gray-600">Estruturas cilíndricas unidimensionais (1D), que podem ser vistas como folhas de grafeno enroladas. Suas propriedades eletrônicas (metálicas ou semicondutoras) dependem criticamente do ângulo em que a folha é enrolada (quiralidade).</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-16 border-gray-200">
+
+        <section id="properties" class="my-12">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">Propriedades Extraordinárias</h2>
+                <p class="max-w-3xl mx-auto text-gray-600">Tanto o grafeno quanto os NTCs exibem um conjunto de propriedades físicas e eletrônicas que superam em muito os materiais convencionais. Esta seção destaca as características mais notáveis que os tornam candidatos ideais para inovações tecnológicas. Explore os cartões abaixo para ter uma visão geral de seus atributos únicos.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-md card">
+                    <h4 class="font-bold text-lg mb-2">Condutividade Elétrica Superior</h4>
+                    <p class="text-gray-600">Ambos os materiais são excelentes condutores. No grafeno, os elétrons se movem quase sem resistência. Nos NTCs, a condução é "balística" (sem espalhamento), permitindo fluxo de corrente sem aquecimento.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md card">
+                    <h4 class="font-bold text-lg mb-2">Condutividade Térmica Excepcional</h4>
+                    <p class="text-gray-600">Possuem uma capacidade extraordinária de conduzir calor, com o grafeno atingindo até 5000 W/m K, tornando-os ideais para gerenciamento térmico em eletrônicos e outros sistemas.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md card">
+                    <h4 class="font-bold text-lg mb-2">Alta Resistência Mecânica</h4>
+                    <p class="text-gray-600">Apesar de sua leveza, ambos são extremamente fortes e rígidos, o que os torna excelentes aditivos para reforçar materiais compósitos em setores como aeroespacial e automotivo.</p>
+                </div>
+                 <div class="bg-white p-6 rounded-xl shadow-md card">
+                    <h4 class="font-bold text-lg mb-2">Leveza e Flexibilidade</h4>
+                    <p class="text-gray-600">Sua baixa densidade combinada com alta resistência permite a criação de materiais compósitos e dispositivos mais leves e duráveis, desde equipamentos esportivos a componentes de aeronaves.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md card">
+                    <h4 class="font-bold text-lg mb-2">Propriedades Quânticas Únicas</h4>
+                    <p class="text-gray-600">O grafeno exibe fenômenos como o Efeito Hall Quântico e a "Fase de Berry", onde os elétrons se comportam como partículas sem massa, minimizando perdas de energia durante o transporte.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md card">
+                    <h4 class="font-bold text-lg mb-2">Transparência Óptica</h4>
+                    <p class="text-gray-600">O grafeno é quase totalmente transparente, absorvendo apenas 2,3% da luz, o que o torna ideal para aplicações em telas flexíveis, células solares e optoeletrônica.</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-16 border-gray-200">
+
+        <section id="applications" class="my-12">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">O Mundo das Aplicações</h2>
+                <p class="max-w-3xl mx-auto text-gray-600">As propriedades únicas do grafeno e dos NTCs abrem portas para uma vasta gama de aplicações que estão transformando indústrias. Esta seção interativa permite explorar o impacto desses materiais em diferentes setores. Clique nas abas para visualizar o crescimento e os avanços em cada área e ver como os dados se refletem no gráfico.</p>
+            </div>
+            <div class="flex justify-center mb-8 border-b border-gray-200">
+                <button data-category="energy" class="application-tab px-4 py-2 border-b-2 active-tab">Energia</button>
+                <button data-category="biomedicine" class="application-tab px-4 py-2 border-b-2 border-transparent text-gray-500">Biomedicina</button>
+                <button data-category="composites" class="application-tab px-4 py-2 border-b-2 border-transparent text-gray-500">Compósitos</button>
+                <button data-category="water" class="application-tab px-4 py-2 border-b-2 border-transparent text-gray-500">Água e Outros</button>
+            </div>
+            <div class="grid lg:grid-cols-2 gap-8 items-center">
+                <div id="application-text-content" class="text-gray-600 prose">
+                </div>
+                <div class="chart-container h-80 md:h-96">
+                    <canvas id="applicationsChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-16 border-gray-200">
+
+        <section id="research" class="my-12">
+             <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">Cenário Global de Pesquisa e Desenvolvimento (P&D)</h2>
+                <p class="max-w-3xl mx-auto text-gray-600">A corrida pela inovação em nanomateriais de carbono é global. O gráfico abaixo ilustra uma tendência fundamental no cenário de P&D: um deslocamento do interesse de pesquisa dos NTCs para o grafeno. Esta visualização, baseada na análise de publicações científicas e patentes entre 2004 e 2014, mostra o crescimento exponencial do grafeno, enquanto o interesse nos NTCs, um campo mais maduro, começou a estabilizar.</p>
+            </div>
+            <div class="bg-white p-4 sm:p-6 rounded-xl shadow-md">
+                <div class="chart-container h-80 md:h-96">
+                    <canvas id="researchChart"></canvas>
+                </div>
+            </div>
+             <div class="mt-8 text-center text-gray-600">
+                <p>Países como <strong>China, EUA, Japão e Coreia do Sul</strong> lideram a pesquisa, com forte colaboração entre indústria e academia. No Brasil, apesar da existência de redes de pesquisa robustas como o INCTNC, ainda há uma lacuna para transformar a ciência em produtos de tecnologia nacional em larga escala.</p>
+            </div>
+        </section>
+
+        <hr class="my-16 border-gray-200">
+
+        <section id="challenges" class="my-12">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">Desafios e o Caminho a Seguir</h2>
+                <p class="max-w-3xl mx-auto text-gray-600">Apesar do imenso potencial, a jornada do laboratório para o mercado em massa é repleta de desafios técnicos, econômicos e de segurança. Esta seção final aborda os principais obstáculos e as perspectivas futuras que definirão o sucesso comercial e a aceitação social do grafeno e dos NTCs. Use os botões para expandir cada tópico.</p>
+            </div>
+
+            <div class="space-y-4 max-w-4xl mx-auto">
+                <div class="accordion-item bg-white rounded-lg shadow-sm">
+                    <button class="accordion-header w-full text-left p-4 font-semibold text-gray-800 flex justify-between items-center">
+                        Desafios de Produção e Aplicação
+                        <span class="accordion-icon text-xl">+</span>
+                    </button>
+                    <div class="accordion-content max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+                        <div class="p-4 border-t border-gray-200 text-gray-600">
+                           <p><strong>Aglomeramento:</strong> Devido a forças de van der Waals, as nanoestruturas tendem a se agrupar, dificultando sua dispersão homogênea em compósitos. A funcionalização com surfactantes é uma solução em estudo.</p>
+                           <p class="mt-2"><strong>Custo e Escalabilidade:</strong> A produção em larga escala de materiais de alta qualidade e pureza ainda é cara e complexa, especialmente o controle de quiralidade nos NTCs.</p>
+                           <p class="mt-2"><strong>Base Industrial:</strong> No Brasil, a ausência de uma base industrial forte e de usuários finais para esses nanomateriais limita o desenvolvimento de tecnologia nacional.</p>
+                        </div>
+                    </div>
+                </div>
+                 <div class="accordion-item bg-white rounded-lg shadow-sm">
+                    <button class="accordion-header w-full text-left p-4 font-semibold text-gray-800 flex justify-between items-center">
+                        Impacto Ambiental e Saúde
+                        <span class="accordion-icon text-xl">+</span>
+                    </button>
+                    <div class="accordion-content max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+                        <div class="p-4 border-t border-gray-200 text-gray-600">
+                           <p><strong>Riscos à Saúde:</strong> A exposição, principalmente por inalação, levanta preocupações. Estudos indicam riscos de inflamação, fibrose pulmonar, danos ao DNA e citotoxicidade se não manuseados corretamente.</p>
+                           <p class="mt-2"><strong>Impacto Ambiental:</strong> Embora possam criar produtos mais sustentáveis, o descarte inadequado pode levar à contaminação de ecossistemas. A produção também pode gerar emissões de gases de efeito estufa.</p>
+                           <p class="mt-2"><strong>Regulamentação:</strong> A necessidade de marcos regulatórios claros para garantir a produção, o uso e o descarte seguros é um debate global contínuo e crucial para a aceitação social.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item bg-white rounded-lg shadow-sm">
+                    <button class="accordion-header w-full text-left p-4 font-semibold text-gray-800 flex justify-between items-center">
+                        Perspectivas Futuras
+                        <span class="accordion-icon text-xl">+</span>
+                    </button>
+                    <div class="accordion-content max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+                        <div class="p-4 border-t border-gray-200 text-gray-600">
+                           <p>O futuro do grafeno e dos NTCs depende da superação dos desafios atuais. A pesquisa se concentra em métodos de síntese mais sustentáveis e escaláveis, na compreensão aprofundada dos efeitos biológicos e no desenvolvimento de aplicações cada vez mais especializadas. A integração entre pesquisa acadêmica e indústria será fundamental para que esses "primos mais jovens da família do carbono" possam, de fato, moldar o futuro da tecnologia.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center">
+            <p>&copy; 2025 Painel Interativo de Nanomateriais. Criado a partir de dados de relatório.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const applicationsData = {
+                energy: {
+                    labels: ['Baterias (Eficiência)', 'Demanda em VEs', 'Supercapacitores (Energia)', 'Células Solares (Desempenho)', 'Adoção Solar'],
+                    data: [55, 60, 50, 50, 65],
+                    text: `
+                        <h4>Transformando o Setor de Energia</h4>
+                        <p>O grafeno está revolucionando o armazenamento e a geração de energia. Baterias de íon-lítio aprimoradas com grafeno tiveram sua <strong>eficiência aumentada em 55%</strong>, impulsionando um crescimento de 60% na demanda do mercado de veículos elétricos. Supercapacitores melhoraram a densidade de energia em 50%, e o desempenho de células solares avançou 50% com eletrodos de grafeno.</p>
+                    `
+                },
+                biomedicine: {
+                    labels: ['Adoção Biomédica', 'Biossensores (Pesquisa)', 'Entrega de Fármacos (Eficácia)', 'Eng. de Tecidos'],
+                    data: [65, 75, 50, 60],
+                    text: `
+                        <h4>Avanços na Biomedicina</h4>
+                        <p>As propriedades antibacterianas e biocompatíveis impulsionaram a adoção do grafeno em aplicações biomédicas em <strong>65%</strong>. A pesquisa em biossensores baseados em grafeno para diagnóstico preciso cresceu 75%. Além disso, o uso de óxido de grafeno para entrega direcionada de medicamentos aumentou a eficácia do tratamento em 50%, com grande potencial em engenharia de tecidos.</p>
+                    `
+                },
+                composites: {
+                    labels: ['Adoção de Compósitos', 'Uso Aeroespacial', 'Automotivo (Resistência)', 'Impressão 3D (Tração)'],
+                    data: [70, 60, 50, 40],
+                    text: `
+                        <h4>Materiais Compósitos Mais Fortes e Leves</h4>
+                        <p>O uso de compósitos à base de grafeno cresceu <strong>70%</strong>. No setor aeroespacial, o aumento foi de 60%, reduzindo o peso das aeronaves. Na indústria automotiva, polímeros reforçados com grafeno melhoraram a resistência mecânica e ao calor em 50%. Os NTCs também são amplamente usados para reforço, superando fibras de carbono convencionais.</p>
+                    `
+                },
+                water: {
+                    labels: ['Filtração de Água (Adoção)', 'Revestimentos (Adoção)'],
+                    data: [75, 55],
+                    text: `
+                        <h4>Purificação de Água e Revestimentos</h4>
+                        <p>Membranas de grafeno, 1.000 vezes mais finas que as convencionais, são altamente eficientes para dessalinização, e sua aplicação na filtração de água cresceu <strong>75%</strong>. Além disso, revestimentos à base de grafeno para dissipação de calor, proteção contra corrosão e lubrificação viram um aumento de 55% na adoção industrial.</p>
+                    `
+                }
+            };
+            
+            const ctxApplications = document.getElementById('applicationsChart').getContext('2d');
+            let applicationsChart = new Chart(ctxApplications, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Aumento Percentual (%)',
+                        data: [],
+                        backgroundColor: 'rgba(30, 64, 175, 0.7)',
+                        borderColor: 'rgba(30, 64, 175, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Aumento / Crescimento (%)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const applicationTextContent = document.getElementById('application-text-content');
+            const applicationTabs = document.querySelectorAll('.application-tab');
+
+            function updateApplicationContent(category) {
+                const content = applicationsData[category];
+                if (!content) return;
+
+                applicationsChart.data.labels = content.labels;
+                applicationsChart.data.datasets[0].data = content.data;
+                applicationsChart.update();
+
+                applicationTextContent.innerHTML = content.text;
+
+                applicationTabs.forEach(tab => {
+                    tab.classList.remove('active-tab', 'text-gray-500');
+                    if (tab.dataset.category === category) {
+                        tab.classList.add('active-tab');
+                    } else {
+                        tab.classList.add('text-gray-500');
+                    }
+                });
+            }
+            
+            applicationTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    updateApplicationContent(tab.dataset.category);
+                });
+            });
+
+            updateApplicationContent('energy');
+
+            const ctxResearch = document.getElementById('researchChart').getContext('2d');
+            const researchChart = new Chart(ctxResearch, {
+                type: 'line',
+                data: {
+                    labels: ['2004', '2006', '2008', '2010', '2012', '2014'],
+                    datasets: [{
+                        label: 'Publicações sobre Grafeno',
+                        data: [100, 500, 2000, 8000, 15000, 25000],
+                        borderColor: 'rgb(30, 64, 175)',
+                        backgroundColor: 'rgba(30, 64, 175, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }, {
+                        label: 'Publicações sobre NTCs',
+                        data: [6000, 7000, 7500, 7200, 6800, 6500],
+                        borderColor: 'rgb(107, 114, 128)',
+                        backgroundColor: 'rgba(107, 114, 128, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Número Aproximado de Publicações/Patentes'
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Tendências de Publicações: Grafeno vs. NTCs (2004-2014)',
+                            font: {
+                                size: 16
+                            }
+                        }
+                    }
+                }
+            });
+            
+            const accordions = document.querySelectorAll('.accordion-item');
+            accordions.forEach(item => {
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                const icon = item.querySelector('.accordion-icon');
+                header.addEventListener('click', () => {
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                        icon.textContent = '+';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        icon.textContent = '−';
+                    }
+                });
+            });
+
+            const navLinks = document.querySelectorAll('a[href^="#"]');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    let target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        window.scrollTo({
+                            top: target.offsetTop - 80, 
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
